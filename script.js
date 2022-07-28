@@ -268,15 +268,25 @@ const products = [
 ];
 const autoCompleteInputTag =
   document.getElementsByClassName("autoCompleteInput")[0];
-const resultContainerTag =
+let resultContainerTag =
   document.getElementsByClassName("resultContainer")[0];
+let filteredProducts = [];
+
 autoCompleteInputTag.addEventListener("keyup", (event) => {
+  if(
+    event.key === "ArrowDown" ||
+    event.key === "ArrowUp" ||
+    event.key === "Enter"
+  ){
+    navigateAndSelectProduct(event.key);
+    return;
+  }
   resultContainerTag.innerHTML = "";
   const searchText = event.target.value.toLowerCase();
   if(searchText.length ===0){
     return;
   }
-  const filteredProducts = products.filter((product) => {
+  filteredProducts = products.filter((product) => {
     return product.title.toLowerCase().includes(searchText);
   });
   const hasProductsToShow = filteredProducts.length > 0;
@@ -300,3 +310,50 @@ autoCompleteInputTag.addEventListener("keyup", (event) => {
     }
   }
 });
+
+let indexToSelect =-1;
+const navigateAndSelectProduct = (key)=>{
+  if(key==="ArrowDown"){
+    if(indexToSelect === filteredProducts.length -1){
+      indexToSelect = -1;
+      deselectProduct();
+      return;
+    }
+    indexToSelect +=1;
+    const productItemContainerToSelect= selectProduct(indexToSelect);
+    
+    if(indexToSelect>0){
+     deselectProduct();
+    }
+    productItemContainerToSelect.classList.add("selected");
+  }else if(key === "ArrowUp"){
+    if(indexToSelect === -1){
+      return;
+    }
+    if(indexToSelect === 0){
+      deselectProduct();
+      indexToSelect = -1;
+      return;
+    }
+    indexToSelect -=1;
+    deselectProduct();
+    const productItemContainerToSelect= selectProduct(indexToSelect);
+    productItemContainerToSelect.classList.add("selected");
+  }else{
+    const enteredProduct  = selectProduct(indexToSelect);
+    console.log(enteredProduct);
+  }
+};
+  const selectProduct = (index)=>{
+    const productIdToSelect = filteredProducts[index].id.toString();
+    const productItemContainerToSelect = document.getElementById(productIdToSelect);
+    productItemContainerToSelect.style.backgroundColor ="#237BFF";
+    productItemContainerToSelect.style.color = "#fff";
+    return productItemContainerToSelect;
+  }
+  const deselectProduct = ()=>{
+    const productToDeselect = document.getElementsByClassName("selected")[0];
+    productToDeselect.style.backgroundColor = "#fff";
+    productToDeselect.firstChild.style.color = "black";
+    productToDeselect.classList.remove("selected");
+  }
